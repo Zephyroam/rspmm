@@ -1,0 +1,4 @@
+include rspmm/source/*.cpp
+include rspmm/source/*.cu
+include rspmm/source/*.h
+include rspmm/source/*.cuh
