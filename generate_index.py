@@ -11,6 +11,8 @@ res = requests.get(API, headers=headers)
 res.raise_for_status()
 assets = res.json()["assets"]
 
+os.makedirs("docs", exist_ok=True)
+
 with open("docs/index.html", "w") as f:
     f.write("<html><body><h1>Available Wheels</h1><ul>\n")
     for asset in assets:
