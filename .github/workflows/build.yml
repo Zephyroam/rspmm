@@ -8,31 +8,37 @@ on:
 jobs:
   build-and-upload:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+
     container:
       image: "nvidia/cuda:12.8.1-cudnn-runtime-ubuntu24.04"
 
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.10"
+    - name: Install Python ${{ matrix.python-version }}
+      run: |
+        apt update
+        apt install -y software-properties-common
+        add-apt-repository -y ppa:deadsnakes/ppa
+        apt update
+        apt install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-distutils curl
+        curl -sS https://bootstrap.pypa.io/get-pip.py | python${{ matrix.python-version }}
 
     - name: Install build tools
-      run: pip install build
-
-    # - name: Install GPU deps
-    #   uses: Jimver/cuda-toolkit@v0.2.22
+      run: python${{ matrix.python-version }} -m pip install build
 
     - name: Clean dist
       run: rm -rf dist
 
     - name: Build CPU Wheel
-      run: python -m build --wheel --outdir dist/cpu
+      run: python${{ matrix.python-version }} -m build --wheel --outdir dist/cpu
 
     - name: Build GPU Wheel
-      run: RSPMM_WITH_CUDA=1 python -m build --wheel --outdir dist/gpu
+      run: RSPMM_WITH_CUDA=1 python${{ matrix.python-version }} -m build --wheel --outdir dist/gpu
 
     - name: Upload to GitHub Release
       uses: softprops/action-gh-release@v1
