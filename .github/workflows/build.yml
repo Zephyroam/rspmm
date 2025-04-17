@@ -8,6 +8,8 @@ on:
 jobs:
   build-and-upload:
     runs-on: ubuntu-latest
+    container:
+      image: "nvidia/cuda:12.2.0-cudnn8-runtime-ubuntu22.04"
 
     steps:
     - uses: actions/checkout@v3
