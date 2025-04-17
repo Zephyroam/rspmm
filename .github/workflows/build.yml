@@ -6,7 +6,9 @@ on:
       - "v*"
 
 jobs:
-  build-and-upload:
+
+  build-linux:
+    name: Build Linux Wheels
     runs-on: ubuntu-latest
 
     strategy:
@@ -25,7 +27,7 @@ jobs:
         apt install -y software-properties-common
         add-apt-repository -y ppa:deadsnakes/ppa
         apt update
-        apt install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-distutils curl python${{ matrix.python-version }}-dev
+        apt install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-distutils curl python${{ matrix.python-version }}-dev ninja-build
         curl -sS https://bootstrap.pypa.io/get-pip.py | python${{ matrix.python-version }}
 
     - name: Install build tools
@@ -47,9 +49,42 @@ jobs:
           dist/cpu/*.whl
           dist/gpu/*.whl
 
+
+  build-macos:
+    name: Build macOS Wheels
+    runs-on: macos-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install build tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install build
+
+    - name: Clean dist
+      run: rm -rf dist
+
+    - name: Build CPU Wheel (macOS)
+      run: python -m build --wheel --outdir dist/cpu
+
+    - name: Upload to GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: dist/cpu/*.whl
+
   update-index:
     name: Update GitHub Pages Index
-    needs: build-and-upload
+    needs: [build-linux, build-macos]
     runs-on: ubuntu-latest
 
     steps:
