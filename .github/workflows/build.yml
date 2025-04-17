@@ -22,8 +22,8 @@ jobs:
     - name: Install build tools
       run: pip install build
 
-    - name: Install GPU deps
-      uses: Jimver/cuda-toolkit@v0.2.22
+    # - name: Install GPU deps
+    #   uses: Jimver/cuda-toolkit@v0.2.22
 
     - name: Clean dist
       run: rm -rf dist
