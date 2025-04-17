@@ -5,10 +5,12 @@ from setuptools import setup, find_packages
 import torch
 from torch.utils.cpp_extension import BuildExtension, CUDAExtension, CppExtension
 
+use_cuda = os.getenv("RSPMM_WITH_CUDA", "0") == "1"
+cuda_suffix = "+cuda" if use_cuda else ""
+
 def get_extensions():
     sources = glob.glob(os.path.join("rspmm", "source", "*.cpp"))
 
-    use_cuda = os.getenv("RSPMM_WITH_CUDA", "0") == "1"
     if use_cuda:
         sources += glob.glob(os.path.join("rspmm", "source", "*.cu"))
 
@@ -34,7 +36,7 @@ def get_extensions():
     ]
 
 setup(
-    name="rspmm",
+    name=f"rspmm{cuda_suffix}",
     version="0.2.0",
     packages=find_packages(),
     install_requires=["torch"],
