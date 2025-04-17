@@ -8,10 +8,9 @@ from torch.utils.cpp_extension import BuildExtension, CUDAExtension, CppExtensio
 def get_extensions():
     sources = glob.glob(os.path.join("rspmm", "source", "*.cpp"))
 
-    use_cuda = False
-    if torch.cuda.is_available():
+    use_cuda = os.getenv("RSPMM_WITH_CUDA", "0") == "1"
+    if use_cuda:
         sources += glob.glob(os.path.join("rspmm", "source", "*.cu"))
-        use_cuda = True
 
     extra_compile_args = {"cxx": ["-Ofast"]}
     if use_cuda:

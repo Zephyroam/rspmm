@@ -1,0 +1,63 @@
+name: Build and Release Wheels
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Install build tools
+      run: pip install build
+
+    - name: Install GPU deps
+      uses: Jimver/cuda-toolkit@v0.2.23
+
+    - name: Build Wheel
+      run: |
+        python -m build --wheel
+
+    - name: Build Wheel for GPU
+      run: |
+        RSPMM_WITH_CUDA=1 python -m build --wheel
+
+    - name: Upload to GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: dist/*.whl
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  update-index:
+    name: Update GitHub Pages Index
+    needs: build-and-upload
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+
+    - name: Generate index.html
+      run: |
+        pip install requests
+        python generate_index.py
+
+    - name: Commit and Push index.html
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "actions@github.com"
+        git add docs/index.html
+        git commit -m "🤖 Update index.html for wheels [skip ci]" || echo "No changes"
+        git push
