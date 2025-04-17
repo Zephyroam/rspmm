@@ -25,7 +25,7 @@ jobs:
         apt install -y software-properties-common
         add-apt-repository -y ppa:deadsnakes/ppa
         apt update
-        apt install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-distutils curl
+        apt install -y python${{ matrix.python-version }} python${{ matrix.python-version }}-distutils curl python${{ matrix.python-version }}-dev
         curl -sS https://bootstrap.pypa.io/get-pip.py | python${{ matrix.python-version }}
 
     - name: Install build tools
